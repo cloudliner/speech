@@ -182,18 +182,69 @@ function streamingRecognize (filename, encoding, sampleRate) {
     config: {
       encoding: encoding,
       sampleRate: sampleRate
-    }
+    },
+    singleUtterance: false,
+    interimResults: false
   };
 
   // Stream the audio to the Google Cloud Speech API
+  /*
   const recognizeStream = speech.createRecognizeStream(request)
     .on('error', console.error)
     .on('data', (data) => {
       console.log('Data received: %j', data);
     });
-
+  */
   // Stream an audio file from disk to the Speech API, e.g. "./resources/audio.raw"
+  /*
   fs.createReadStream(filename).pipe(recognizeStream);
+  */
+  var recognizeStream = null; 
+  var elapsed = 0.0;
+  const fileReaderStream = fs.createReadStream(filename)
+    .on('error', console.error)
+    .on('data', (data) => {
+      if (recognizeStream === null || 58.0 < elapsed) {
+        if (recognizeStream !== null) {
+          recognizeStream.end();
+        }
+        recognizeStream = speech.createRecognizeStream(request)
+          .on('error', console.error)
+          .on('data', (data) => {
+            // console.log('Data length: %s', data.results.length);
+            // console.log('Data received: %j', data);
+            if (data.results.length !== 0) {
+              console.log('%j', data.results);
+            }
+            // if (data.results.length !== 0) {
+            //   recognizeStream.end();
+            //   recognizeStream = null;
+            // }
+          });
+        elapsed = 0;
+      }
+      recognizeStream.write(data);
+      // recognizeStream.uncork();
+      var time = data.length / 88;
+      elapsed = elapsed + time/1000;
+      // console.log('time: %d', elapsed);
+      var e = new Date().getTime() + (time);
+      while (new Date().getTime() <= e) {
+        // 
+      }
+    })
+    .on('end', () => {
+      // console.log('end');
+      recognizeStream.end();
+    });
+  
+  /*
+  const fileReaderStream = fs.createReadStream(filename)
+  var chunk;
+  while (null !== (chunk = fileReaderStream.read())) {
+    console.log(chunk);
+  }
+  */
   // [END speech_streaming_recognize]
 }
 
