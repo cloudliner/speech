@@ -212,9 +212,9 @@ function streamingRecognize (filename, encoding, sampleRate) {
           .on('error', console.error)
           .on('data', (data) => {
             // console.log('Data length: %s', data.results.length);
-            // console.log('Data received: %j', data);
+            console.log('Data received: %j', data);
             if (data.results.length !== 0) {
-              console.log('%j', data.results);
+              // console.log('%j', data.results);
             }
             // if (data.results.length !== 0) {
             //   recognizeStream.end();
@@ -227,14 +227,14 @@ function streamingRecognize (filename, encoding, sampleRate) {
       // recognizeStream.uncork();
       var time = data.length / 88;
       elapsed = elapsed + time/1000;
-      // console.log('time: %d', elapsed);
+      console.log('time: %d', elapsed);
       var e = new Date().getTime() + (time);
       while (new Date().getTime() <= e) {
         // 
       }
     })
     .on('end', () => {
-      // console.log('end');
+      console.log('end');
       recognizeStream.end();
     });
   
